@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Prishu SIP Return Calculator</title>
+		<style>
+			/* General Reset */
+			* {
+				margin: 0;
+				padding: 0;
+				box-sizing: border-box;
+				font-family: 'Arial', sans-serif;
+			}
+
+			body {
+				background: #e0e5ec;
+				color: #333;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				min-height: 100vh;
+				padding: 20px;
+				transition: background 0.3s ease, color 0.3s ease;
+			}
+
+			.container {
+				background: #e0e5ec;
+				padding: 30px;
+				border-radius: 20px;
+				box-shadow: 20px 20px 40px #a3b1c6, -20px -20px 40px #ffffff;
+				max-width: 800px;
+				width: 100%;
+				transition: background 0.3s ease, box-shadow 0.3s ease;
+			}
+
+			/* Dark Mode Toggle Switch */
+			.dark-mode-toggle {
+				display: flex;
+				align-items: center;
+				margin-bottom: 20px;
+			}
+
+			.switch {
+				position: relative;
+				display: inline-block;
+				width: 60px;
+				height: 34px;
+			}
+
+			.switch input {
+				opacity: 0;
+				width: 0;
+				height: 0;
+			}
+
+			.slider {
+				position: absolute;
+				cursor: pointer;
+				top: 0;
+				left: 0;
+				right: 0;
+				bottom: 0;
+				background: #ccc;
+				transition: 0.4s;
+				border-radius: 34px;
+			}
+
+			.slider:before {
+				position: absolute;
+				content: "";
+				height: 26px;
+				width: 26px;
+				left: 4px;
+				bottom: 4px;
+				background: #fff;
+				transition: 0.4s;
+				border-radius: 50%;
+			}
+
+			input:checked + .slider {
+				background: #667eea;
+				/* Blue background when toggled */
+			}
+
+			input:checked + .slider:before {
+				transform: translateX(26px);
+			}
+
+			/* Rounded sliders */
+			.slider.round {
+				border-radius: 34px;
+			}
+
+			.slider.round:before {
+				border-radius: 50%;
+			}
+
+			/* Dark Mode Toggle Label */
+			.dark-mode-toggle span {
+				margin-left: 10px;
+				font-size: 16px;
+				color: #333;
+			}
+
+			/* Dark Mode Styles */
+			body.dark-mode {
+				background: #1e1e1e;
+				color: #f5f5f5;
+			}
+
+			body.dark-mode .container {
+				background: #2c2c2c;
+				box-shadow: 20px 20px 40px #1f1f1f, -20px -20px 40px #393939;
+			}
+
+			body.dark-mode .dark-mode-toggle span {
+				color: #f5f5f5;
+			}
+
+			body.dark-mode input {
+				background: #2c2c2c;
+				color: #f5f5f5;
+				box-shadow: inset 8px 8px 16px #1f1f1f, inset -8px -8px 16px #393939;
+			}
+
+			body.dark-mode button {
+				background: #2c2c2c;
+				color: #f5f5f5;
+				box-shadow: 8px 8px 16px #1f1f1f, -8px -8px 16px #393939;
+			}
+
+			body.dark-mode button:hover {
+				box-shadow: inset 8px 8px 16px #1f1f1f, inset -8px -8px 16px #393939;
+			}
+
+			body.dark-mode .result-box,
+			body.dark-mode .monthly-breakdown {
+				background: #2c2c2c;
+				box-shadow: 8px 8px 16px #1f1f1f, -8px -8px 16px #393939;
+			}
+
+			body.dark-mode th {
+				background: #667eea;
+				color: #fff;
+			}
+
+			body.dark-mode td {
+				background: #2c2c2c;
+				color: #f5f5f5;
+			}
+
+			/* Input and Button Styling */
+			.input-group {
+				margin-bottom: 20px;
+			}
+
+			label {
+				display: block;
+				margin-bottom: 5px;
+				color: #555;
+				font-weight: bold;
+			}
+
+			input {
+				width: 100%;
+				padding: 12px;
+				border: none;
+				border-radius: 15px;
+				background: #e0e5ec;
+				box-shadow: inset 8px 8px 16px #a3b1c6, inset -8px -8px 16px #ffffff;
+				font-size: 16px;
+				color: #333;
+				transition: box-shadow 0.3s ease;
+			}
+
+			input:focus {
+				box-shadow: inset 4px 4px 8px #a3b1c6, inset -4px -4px 8px #ffffff;
+				outline: none;
+			}
+
+			.button-group {
+				display: flex;
+				gap: 10px;
+				margin-top: 20px;
+			}
+
+			button {
+				flex: 1;
+				padding: 12px;
+				border: none;
+				border-radius: 15px;
+				font-size: 16px;
+				color: #333;
+				background: #e0e5ec;
+				box-shadow: 8px 8px 16px #a3b1c6, -8px -8px 16px #ffffff;
+				cursor: pointer;
+				transition: all 0.3s ease;
+			}
+
+			button:hover {
+				box-shadow: inset 8px 8px 16px #a3b1c6, inset -8px -8px 16px #ffffff;
+			}
+
+			#calculate-btn {
+				color: #fff;
+				background: #667eea;
+				box-shadow: 8px 8px 16px #5a6fd1, -8px -8px 16px #728dff;
+			}
+
+			#calculate-btn:hover {
+				box-shadow: inset 8px 8px 16px #5a6fd1, inset -8px -8px 16px #728dff;
+			}
+
+			#reset-btn {
+				color: #fff;
+				background: #ff4d4d;
+				box-shadow: 8px 8px 16px #e64444, -8px -8px 16px #ff5656;
+			}
+
+			#reset-btn:hover {
+				box-shadow: inset 8px 8px 16px #e64444, inset -8px -8px 16px #ff5656;
+			}
+
+			#export-pdf-btn {
+				color: #fff;
+				background: #28a745;
+				box-shadow: 8px 8px 16px #218838, -8px -8px 16px #2fd055;
+			}
+
+			#export-pdf-btn:hover {
+				box-shadow: inset 8px 8px 16px #218838, inset -8px -8px 16px #2fd055;
+			}
+
+			.result-box {
+				margin-top: 30px;
+				background: #e0e5ec;
+				padding: 20px;
+				border-radius: 15px;
+				box-shadow: 8px 8px 16px #a3b1c6, -8px -8px 16px #ffffff;
+			}
+
+			h2 {
+				text-align: center;
+				color: #333;
+				margin-bottom: 15px;
+				font-size: 24px;
+			}
+
+			table {
+				width: 100%;
+				border-collapse: collapse;
+				margin-top: 10px;
+			}
+
+			th,
+			td {
+				padding: 12px;
+				text-align: center;
+				color: #333;
+				background: #e0e5ec;
+				box-shadow: 4px 4px 8px #a3b1c6, -4px -4px 8px #ffffff;
+			}
+
+			th {
+				background: #667eea;
+				color: #fff;
+			}
+
+			.monthly-breakdown {
+				margin-top: 30px;
+			}
+
+			.monthly-breakdown table {
+				width: 100%;
+				border-collapse: collapse;
+			}
+
+			.monthly-breakdown th,
+			.monthly-breakdown td {
+				padding: 10px;
+				text-align: center;
+			}
+
+			.monthly-breakdown th {
+				background: #764ba2;
+				color: #fff;
+			}
+
+			.monthly-breakdown td {
+				background: #e0e5ec;
+			}
+
+			/* Topic Styling */
+			.topic {
+				margin-bottom: 30px;
+			}
+
+			.topic-title {
+				color: #ff4d4d;
+				/* Red */
+				font-size: 28px;
+				margin-bottom: 15px;
+				text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+			}
+
+			.subtopic {
+				background: #e0e5ec;
+				padding: 15px;
+				border-radius: 15px;
+				box-shadow: 8px 8px 16px #a3b1c6, -8px -8px 16px #ffffff;
+				margin-bottom: 15px;
+			}
+
+			.subtopic-title {
+				color: #33cc33;
+				/* Green */
+				font-size: 20px;
+				margin-bottom: 10px;
+			}
+
+			.subtopic-description {
+				color: #3333ff;
+				/* Blue */
+				font-size: 16px;
+				line-height: 1.5;
+			}
+
+			/* FAQ Styling */
+			.faq {
+				margin-top: 30px;
+			}
+
+			.faq-title {
+				color: #ff4d4d;
+				/* Red */
+				font-size: 28px;
+				margin-bottom: 15px;
+				text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+			}
+
+			.faq-item {
+				background: #e0e5ec;
+				padding: 15px;
+				border-radius: 15px;
+				box-shadow: 8px 8px 16px #a3b1c6, -8px -8px 16px #ffffff;
+				margin-bottom: 15px;
+			}
+
+			.faq-question {
+				color: #33cc33;
+				/* Green */
+				font-size: 20px;
+				margin-bottom: 10px;
+			}
+
+			.faq-answer {
+				color: #3333ff;
+				/* Blue */
+				font-size: 16px;
+				line-height: 1.5;
+			}
+
+			/* Responsive Design */
+			@media (max-width: 600px) {
+				.container {
+					padding: 20px;
+				}
+
+				.topic-title,
+				.faq-title {
+					font-size: 24px;
+				}
+
+				.subtopic-title,
+				.faq-question {
+					font-size: 18px;
+				}
+
+				.subtopic-description,
+				.faq-answer {
+					font-size: 14px;
+				}
+			}
+
+			/* Dark Mode Styles for Content Sections */
+			body.dark-mode .topic-title,
+			body.dark-mode .faq-title {
+				color: #ff4d4d;
+				/* Red */
+			}
+
+			body.dark-mode .subtopic-title,
+			body.dark-mode .faq-question {
+				color: #33cc33;
+				/* Green */
+			}
+
+			body.dark-mode .subtopic-description,
+			body.dark-mode .faq-answer {
+				color: #3399ff;
+				/* Blue */
+			}
+
+			body.dark-mode .subtopic,
+			body.dark-mode .faq-item {
+				background: #2c2c2c;
+				box-shadow: 8px 8px 16px #1f1f1f, -8px -8px 16px #393939;
+			}
+		</style>
+		<!-- Add jsPDF Library -->
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+	</head>
+
+	<body>
+		<div class="container">
+			<!-- Dark Mode Toggle -->
+			<div class="dark-mode-toggle">
+				<label class="switch">
+					<input type="checkbox" id="dark-mode-toggle">
+					<span class="slider round"></span>
+				</label>
+				<span>Dark Mode</span>
+			</div>
+
+			<h1>Prishu SIP Return Calculator</h1>
+			<div class="input-group">
+				<label for="monthly-investment">Monthly Investment (₹)</label>
+				<input type="number" id="monthly-investment" placeholder="Enter monthly investment">
+			</div>
+			<div class="input-group">
+				<label for="interest-rate">Expected Annual Interest Rate (%)</label>
+				<input type="number" id="interest-rate" placeholder="Enter interest rate">
+			</div>
+			<div class="input-group">
+				<label for="time-period">Time Period (Years)</label>
+				<input type="number" id="time-period" placeholder="Enter time period">
+			</div>
+			<div class="button-group">
+				<button id="calculate-btn">Calculate</button>
+				<button id="reset-btn">Reset</button>
+				<button id="export-pdf-btn">Export to PDF</button>
+			</div>
+
+			<div class="result-box">
+				<h2>Results</h2>
+				<table>
+					<tr>
+						<th>Invested Amount</th>
+						<th>Total Value</th>
+						<th>Profit</th>
+						<th>Annualized Return</th>
+					</tr>
+					<tr>
+						<td id="invested-amount">₹0</td>
+						<td id="total-value">₹0</td>
+						<td id="profit">₹0</td>
+						<td id="annualized-return">0%</td>
+					</tr>
+				</table>
+			</div>
+
+			<div class="monthly-breakdown">
+				<h2>Monthly Breakdown</h2>
+				<table id="monthly-table">
+					<thead>
+						<tr>
+							<th>Month</th>
+							<th>Investment</th>
+							<th>Interest</th>
+							<th>Total</th>
+						</tr>
+					</thead>
+					<tbody>
+						<!-- Monthly data will be populated here -->
+					</tbody>
+				</table>
+			</div>
+
+			<!-- Tool Ad Topics -->
+			<section class="topic">
+				<h1 class="topic-title">Why We Chose It</h1>
+				<div class="subtopic">
+					<h2 class="subtopic-title">Accurate Calculations</h2>
+					<p class="subtopic-description">Our SIP Return Calculator uses advanced algorithms to ensure precise calculations of your investment returns, helping you make informed financial decisions.</p>
+				</div>
+				<div class="subtopic">
+					<h2 class="subtopic-title">User-Friendly Interface</h2>
+					<p class="subtopic-description">With a clean and intuitive design, our tool is easy to use for both beginners and experienced investors.</p>
+				</div>
+				<div class="subtopic">
+					<h2 class="subtopic-title">Completely Free</h2>
+					<p class="subtopic-description">Our tool is 100% free to use, with no hidden charges or subscriptions required.</p>
+				</div>
+			</section>
+
+			<section class="topic">
+				<h1 class="topic-title">How It Works</h1>
+				<div class="subtopic">
+					<h2 class="subtopic-title">Input Your Details</h2>
+					<p class="subtopic-description">Enter your monthly investment, expected annual interest rate, and time period to get started.</p>
+				</div>
+				<div class="subtopic">
+					<h2 class="subtopic-title">Real-Time Results</h2>
+					<p class="subtopic-description">The calculator processes your inputs instantly and displays the total value, profit, and annualized return.</p>
+				</div>
+				<div class="subtopic">
+					<h2 class="subtopic-title">Detailed Breakdown</h2>
+					<p class="subtopic-description">Get a month-by-month breakdown of your investment growth, including interest earned and total value.</p>
+				</div>
+			</section>
+
+			<section class="topic">
+				<h1 class="topic-title">How to Use</h1>
+				<div class="subtopic">
+					<h2 class="subtopic-title">Step 1: Enter Your Investment</h2>
+					<p class="subtopic-description">Fill in the monthly investment amount you plan to contribute.</p>
+				</div>
+				<div class="subtopic">
+					<h2 class="subtopic-title">Step 2: Set Interest Rate</h2>
+					<p class="subtopic-description">Provide the expected annual interest rate for your investment.</p>
+				</div>
+				<div class="subtopic">
+					<h2 class="subtopic-title">Step 3: Choose Time Period</h2>
+					<p class="subtopic-description">Select the number of years you plan to invest.</p>
+				</div>
+				<div class="subtopic">
+					<h2 class="subtopic-title">Step 4: View Results</h2>
+					<p class="subtopic-description">Click "Calculate" to see your total investment value, profit, and annualized return.</p>
+				</div>
+			</section>
+
+			<section class="topic">
+				<h1 class="topic-title">Benefits of SIP</h1>
+				<div class="subtopic">
+					<h2 class="subtopic-title">Disciplined Investing</h2>
+					<p class="subtopic-description">SIP encourages regular investing, helping you build wealth over time.</p>
+				</div>
+				<div class="subtopic">
+					<h2 class="subtopic-title">Power of Compounding</h2>
+					<p class="subtopic-description">By reinvesting returns, SIP leverages compounding to grow your wealth exponentially.</p>
+				</div>
+				<div class="subtopic">
+					<h2 class="subtopic-title">Flexibility</h2>
+					<p class="subtopic-description">You can start with a small amount and increase your investment as your income grows.</p>
+				</div>
+			</section>
+
+			<section class="topic">
+				<h1 class="topic-title">Who Should Use It</h1>
+				<div class="subtopic">
+					<h2 class="subtopic-title">Beginners</h2>
+					<p class="subtopic-description">If you're new to investing, this tool helps you understand how SIP works and its potential returns.</p>
+				</div>
+				<div class="subtopic">
+					<h2 class="subtopic-title">Experienced Investors</h2>
+					<p class="subtopic-description">For seasoned investors, this tool provides accurate projections to fine-tune your investment strategy.</p>
+				</div>
+				<div class="subtopic">
+					<h2 class="subtopic-title">Financial Planners</h2>
+					<p class="subtopic-description">Financial advisors can use this tool to demonstrate SIP benefits to their clients.</p>
+				</div>
+			</section>
+
+			<!-- FAQs Section -->
+			<section class="faq">
+				<h1 class="faq-title">Frequently Asked Questions (FAQs)</h1>
+				<div class="faq-item">
+					<h2 class="faq-question">What is SIP?</h2>
+					<p class="faq-answer">SIP (Systematic Investment Plan) is a method of investing a fixed amount regularly in mutual funds.</p>
+				</div>
+				<div class="faq-item">
+					<h2 class="faq-question">Is the calculator accurate?</h2>
+					<p class="faq-answer">Yes, the calculator uses precise formulas to provide accurate results.</p>
+				</div>
+				<div class="faq-item">
+					<h2 class="faq-question">Can I use it for other investments?</h2>
+					<p class="faq-answer">This tool is specifically designed for SIP calculations, but it can be adapted for similar investments.</p>
+				</div>
+				<div class="faq-item">
+					<h2 class="faq-question">What is the minimum investment amount?</h2>
+					<p class="faq-answer">The minimum investment amount depends on the mutual fund scheme, but our calculator works with any amount.</p>
+				</div>
+				<div class="faq-item">
+					<h2 class="faq-question">Can I change my SIP amount later?</h2>
+					<p class="faq-answer">Yes, most mutual funds allow you to increase or decrease your SIP amount.</p>
+				</div>
+				<div class="faq-item">
+					<h2 class="faq-question">How often should I invest in SIP?</h2>
+					<p class="faq-answer">You can choose to invest monthly, quarterly, or annually, depending on your financial goals.</p>
+				</div>
+				<div class="faq-item">
+					<h2 class="faq-question">What happens if I miss a SIP payment?</h2>
+					<p class="faq-answer">Missing a SIP payment may affect your investment growth. It's best to maintain consistency.</p>
+				</div>
+			</section>
+		</div>
+
+		<script>
+			// Dark Mode Toggle
+			const darkModeToggle = document.getElementById('dark-mode-toggle');
+			const body = document.body;
+
+			// Check for saved dark mode preference in localStorage
+			if (localStorage.getItem('dark-mode') === 'enabled') {
+				body.classList.add('dark-mode');
+				darkModeToggle.checked = true;
+			}
+
+			// Add event listener to the toggle switch
+			darkModeToggle.addEventListener('change', () => {
+				if (darkModeToggle.checked) {
+					body.classList.add('dark-mode');
+					localStorage.setItem('dark-mode', 'enabled'); // Save preference
+				} else {
+					body.classList.remove('dark-mode');
+					localStorage.setItem('dark-mode', 'disabled'); // Save preference
+				}
+			});
+
+			// SIP Calculation
+			document.getElementById('calculate-btn').addEventListener('click', function() {
+				const monthlyInvestment = parseFloat(document.getElementById('monthly-investment').value);
+				const interestRate = parseFloat(document.getElementById('interest-rate').value);
+				const timePeriod = parseFloat(document.getElementById('time-period').value);
+
+				if (isNaN(monthlyInvestment) || isNaN(interestRate) || isNaN(timePeriod)) {
+					alert('Please enter valid numbers in all fields.');
+					return;
+				}
+
+				const months = timePeriod * 12;
+				const monthlyRate = interestRate / 12 / 100;
+				const futureValue = monthlyInvestment * ((Math.pow(1 + monthlyRate, months) - 1) / monthlyRate) * (1 + monthlyRate);
+				const investedAmount = monthlyInvestment * months;
+				const profit = futureValue - investedAmount;
+				const annualizedReturn = (Math.pow(futureValue / investedAmount, 1 / timePeriod) - 1) * 100;
+
+				document.getElementById('invested-amount').textContent = `₹${investedAmount.toFixed(2)}`;
+				document.getElementById('total-value').textContent = `₹${futureValue.toFixed(2)}`;
+				document.getElementById('profit').textContent = `₹${profit.toFixed(2)}`;
+				document.getElementById('annualized-return').textContent = `${annualizedReturn.toFixed(2)}%`;
+
+				const monthlyTable = document.getElementById('monthly-table').getElementsByTagName('tbody')[0];
+				monthlyTable.innerHTML = '';
+				let total = 0;
+				for (let i = 1; i <= months; i++) {
+					total = monthlyInvestment * ((Math.pow(1 + monthlyRate, i) - 1) / monthlyRate) * (1 + monthlyRate);
+					const interest = total - monthlyInvestment * i;
+					const row = monthlyTable.insertRow();
+					row.insertCell().textContent = i;
+					row.insertCell().textContent = `₹${(monthlyInvestment * i).toFixed(2)}`;
+					row.insertCell().textContent = `₹${interest.toFixed(2)}`;
+					row.insertCell().textContent = `₹${total.toFixed(2)}`;
+				}
+			});
+
+			document.getElementById('reset-btn').addEventListener('click', function() {
+				document.getElementById('monthly-investment').value = '';
+				document.getElementById('interest-rate').value = '';
+				document.getElementById('time-period').value = '';
+
+				document.getElementById('invested-amount').textContent = '₹0';
+				document.getElementById('total-value').textContent = '₹0';
+				document.getElementById('profit').textContent = '₹0';
+				document.getElementById('annualized-return').textContent = '0%';
+
+				document.getElementById('monthly-table').getElementsByTagName('tbody')[0].innerHTML = '';
+			});
+
+			// Export to PDF
+			document.getElementById('export-pdf-btn').addEventListener('click', function() {
+				const {
+					jsPDF
+				} = window.jspdf;
+				const doc = new jsPDF();
+
+				// Add title
+				doc.setFontSize(18);
+				doc.setFont("helvetica", "bold");
+				doc.text("SIP Return Calculator Results", 10, 20);
+
+				// Add results table
+				const results = [
+					["Invested Amount", document.getElementById('invested-amount').textContent],
+					["Total Value", document.getElementById('total-value').textContent],
+					["Profit", document.getElementById('profit').textContent],
+					["Annualized Return", document.getElementById('annualized-return').textContent],
+				];
+				doc.autoTable({
+					startY: 30,
+					head: [
+						['Metric', 'Value']
+					],
+					body: results,
+					theme: 'grid',
+					headStyles: {
+						fillColor: '#667eea',
+						textColor: '#fff'
+					},
+					styles: {
+						fontSize: 12
+					},
+				});
+
+				// Add monthly breakdown table
+				const monthlyTable = document.getElementById('monthly-table');
+				const monthlyData = [];
+				for (let i = 0; i < monthlyTable.rows.length; i++) {
+					const row = monthlyTable.rows[i];
+					const month = row.cells[0].textContent;
+					const investment = row.cells[1].textContent;
+					const interest = row.cells[2].textContent;
+					const total = row.cells[3].textContent;
+					monthlyData.push([month, investment, interest, total]);
+				}
+				doc.autoTable({
+					startY: doc.previousAutoTable.finalY + 20,
+					head: [
+						['Month', 'Investment', 'Interest', 'Total']
+					],
+					body: monthlyData,
+					theme: 'grid',
+					headStyles: {
+						fillColor: '#764ba2',
+						textColor: '#fff'
+					},
+					styles: {
+						fontSize: 12
+					},
+				});
+
+				// Save the PDF
+				doc.save("SIP_Return_Results.pdf");
+			});
+		</script>
+	</body>
+
+</html>
